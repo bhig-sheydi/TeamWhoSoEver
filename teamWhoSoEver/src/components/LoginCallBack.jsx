@@ -1,3 +1,4 @@
+// src/Pages/LoginCallback.jsx
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
@@ -6,23 +7,33 @@ const LoginCallback = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleOAuthRedirect = async () => {
-      // Supabase parses the access token from URL automatically
+    const checkSession = async () => {
+      // Listen for auth state changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (session) {
+          console.log("Session detected:", session);
+          navigate("/dashboard"); // redirect to dashboard
+        }
+      });
+
+      // Also try to get session from URL in case of first load
       const { data, error } = await supabase.auth.getSessionFromUrl({
-        storeSession: true, // saves session in local storage
+        storeSession: true,
       });
 
       if (error) {
-        console.error("Error retrieving session:", error.message);
-        navigate("/login"); // redirect to login if error
+        console.error("Error getting session from URL:", error.message);
+        navigate("/login");
       } else if (data.session) {
-        // Successful login, redirect to dashboard
-        console.log("OAuth login success:", data.session);
         navigate("/dashboard");
       }
+
+      return () => {
+        subscription.unsubscribe();
+      };
     };
 
-    handleOAuthRedirect();
+    checkSession();
   }, [navigate]);
 
   return (
