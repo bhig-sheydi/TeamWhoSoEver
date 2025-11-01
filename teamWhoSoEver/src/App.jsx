@@ -1,11 +1,14 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import './App.css';
-import Navbar from './components/Navbar';
-import Home from './Pages/Home';
-import LoginPage from './Pages/LoginPage';
-import SignupPage from './Pages/SignupPage';
-import Footer from './components/Footer';
-import Dashboard from './components/Dashboard';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import "./App.css";
+
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+
+import Home from "./Pages/Home";
+import LoginPage from "./Pages/LoginPage";
+import SignupPage from "./Pages/SignupPage";
+import Dashboard from "./components/Dashboard";
+import LoginCallback from "./components/LoginCallBack";
 
 function App() {
   return (
@@ -15,13 +18,17 @@ function App() {
         <div className="p-4">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/login" element={<LoginPage/>} />
-            <Route path="/signup" element={<SignupPage/>} />
-            <Route path="/login-callback" element={<Dashboard/>} />
-          </Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
 
+            {/* OAuth redirect callback */}
+            <Route path="/login-callback" element={<LoginCallback />} />
+
+            {/* Dashboard route */}
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Routes>
         </div>
-        <Footer/>
+        <Footer />
       </div>
     </Router>
   );

@@ -10,6 +10,7 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Handle email/password login
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
@@ -29,18 +30,19 @@ function Login() {
       setError(error.message);
     } else {
       console.log("Logged in:", data);
-      navigate("/login-callback"); // ✅ Redirect to dashboard on success
+      navigate("/dashboard"); // ✅ Email/password login goes straight to dashboard
     }
 
     setLoading(false);
   };
 
+  // Handle Google OAuth login
   const handleGoogleLogin = async () => {
     setLoading(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/login-callback`,
+        redirectTo: `${window.location.origin}/login-callback`, // Required for OAuth
       },
     });
 
@@ -57,7 +59,6 @@ function Login() {
         backgroundPosition: "center",
       }}
     >
-      {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/60 to-black/40 backdrop-blur-sm"></div>
 
       <div className="relative z-10 bg-white dark:bg-gray-800 bg-opacity-80 dark:bg-opacity-80 p-8 rounded-3xl shadow-2xl w-full max-w-md backdrop-blur-sm">
