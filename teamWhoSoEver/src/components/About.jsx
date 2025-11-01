@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; 
+import { useAuth } from "@/contexts/Auth";
+import { useNavigate } from "react-router-dom";
 
 // Replace with your actual t-shirt images
 import tshirt1 from "../assets/hoodie.png";
@@ -8,6 +10,16 @@ import tshirt3 from "../assets/tee.png";
 function About() {
   const slides = [tshirt1, tshirt2, tshirt3];
   const [currentSlide, setCurrentSlide] = useState(0);
+  const { session } = useAuth();
+  const navigate = useNavigate();
+
+  const handleButtonClick = () => {
+    if (!session) {
+      navigate("/signup");
+    } else {
+      navigate("/login-callback");
+    }
+  };
 
   // Auto-rotate every 3 seconds
   useEffect(() => {
@@ -36,13 +48,12 @@ function About() {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Slideshow with shadow */}
           <div className="flex justify-center relative">
-            <div className="rounded-lg overflow-hidden shadow-2xl">
+            <div className="rounded-lg overflow-hidden shadow-2xl relative">
               <img
                 src={slides[currentSlide]}
                 alt={`T-shirt ${currentSlide + 1}`}
                 className="w-full h-auto block"
               />
-              {/* Shadow at the bottom */}
               <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-black/40 to-transparent" />
             </div>
           </div>
@@ -103,7 +114,10 @@ function About() {
             of purpose, a conversation starter, and a symbol of unwavering belief.
             Stand out, stand firm, and live your faith daily.
           </p>
-          <button className="mt-6 bg-gradient-to-r from-green-500 to-lime-400 text-black px-8 py-3 rounded-2xl font-bold hover:opacity-90 transition-transform transform hover:scale-105 shadow-xl">
+          <button
+            onClick={handleButtonClick}
+            className="mt-6 bg-gradient-to-r from-green-500 to-lime-400 text-black px-8 py-3 rounded-2xl font-bold hover:opacity-90 transition-transform transform hover:scale-105 shadow-xl"
+          >
             Shop the Collection
           </button>
         </div>

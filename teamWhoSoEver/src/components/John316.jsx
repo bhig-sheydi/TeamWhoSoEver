@@ -1,10 +1,22 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react"; 
+import { useAuth } from "@/contexts/Auth";
+import { useNavigate } from "react-router-dom";
 
 const letters = ["J", "O", "H", "N", "3", "1", "6"];
 
 function John316() {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
+  const { session } = useAuth();
+  const navigate = useNavigate();
+
+  const handleButtonClick = () => {
+    if (!session) {
+      navigate("/signup"); // redirect if not logged in
+    } else {
+      navigate("/login-callback"); // redirect if logged in
+    }
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -19,9 +31,8 @@ function John316() {
     };
     window.addEventListener("resize", handleResize);
 
-    // Create exactly 7 bobbles, one per letter
     const bobbles = letters.map((letter, i) => ({
-      x: width / 8 + (i * width / 8), // spread evenly horizontally
+      x: width / 8 + i * (width / 8),
       y: height / 2 + (Math.random() - 0.5) * 100,
       radius: 25 + Math.random() * 20,
       dx: (Math.random() - 0.5) * 0.5,
@@ -49,7 +60,6 @@ function John316() {
       bobbles.forEach((b) => {
         b.x += b.dx;
         b.y += b.dy;
-
         if (b.x - b.radius < 0 || b.x + b.radius > width) b.dx *= -1;
         if (b.y - b.radius < 0 || b.y + b.radius > height) b.dy *= -1;
 
@@ -62,7 +72,7 @@ function John316() {
         ctx.fillStyle = `rgba(0,0,0,${b.opacity * 0.15})`;
         ctx.fill();
 
-        // Bubble with realistic transparency
+        // Bubble
         const gradient = ctx.createRadialGradient(
           b.x - b.radius / 3,
           b.y - b.radius / 3,
@@ -71,7 +81,7 @@ function John316() {
           b.y,
           b.radius
         );
-        gradient.addColorStop(0, `rgba(255, 255, 102, ${b.opacity})`); // lemon
+        gradient.addColorStop(0, `rgba(255, 255, 102, ${b.opacity})`);
         gradient.addColorStop(0.7, `rgba(255, 255, 102, ${b.opacity * 0.3})`);
         gradient.addColorStop(1, `rgba(255, 255, 102, 0)`);
 
@@ -105,16 +115,9 @@ function John316() {
 
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center bg-orange-500 px-6 py-16 overflow-hidden">
-      {/* Canvas for bobbles */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full z-0"
-      />
-
-      {/* Background gradient overlay */}
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full z-0" />
       <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-yellow-400 opacity-20 z-1"></div>
 
-      {/* Main Content */}
       <div className="max-w-4xl w-full text-center flex flex-col items-center z-10">
         <h1 className="text-5xl md:text-7xl font-extrabold text-white drop-shadow-lg mb-6">
           John 3:16
@@ -128,12 +131,14 @@ function John316() {
           A reminder of God’s unwavering love and the foundation of our faith.
         </p>
 
-        <button className="mt-10 bg-gradient-to-r from-green-500 to-lime-400 text-black px-8 py-3 rounded-2xl font-bold hover:opacity-90 transition-transform transform hover:scale-105 shadow-xl">
+        <button
+          onClick={handleButtonClick}
+          className="mt-10 bg-gradient-to-r from-green-500 to-lime-400 text-black px-8 py-3 rounded-2xl font-bold hover:opacity-90 transition-transform transform hover:scale-105 shadow-xl"
+        >
           Explore Our Collection
         </button>
       </div>
 
-      {/* Decorative cross */}
       <div className="absolute bottom-10 right-10 text-white/20 text-[150px] select-none pointer-events-none">
         ✝️
       </div>

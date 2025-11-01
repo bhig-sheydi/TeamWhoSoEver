@@ -5,6 +5,8 @@ import Home from './Pages/Home';
 import LoginPage from './Pages/LoginPage';
 import SignupPage from './Pages/SignupPage';
 import Footer from './components/Footer';
+import Dashboard from './components/Dashboard';
+
 function App() {
   return (
     <Router>
@@ -15,7 +17,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<LoginPage/>} />
             <Route path="/signup" element={<SignupPage/>} />
-
+            <Route path="/login-callback" element={<Dashboard/>} />
           </Routes>
 
         </div>
