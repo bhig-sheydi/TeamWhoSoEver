@@ -7,8 +7,8 @@ import Footer from "./components/Footer";
 import Home from "./Pages/Home";
 import LoginPage from "./Pages/LoginPage";
 import SignupPage from "./Pages/SignupPage";
-import Dashboard from "./components/Dashboard";
 import LoginCallback from "./components/LoginCallBack";
+import DashboardPage from "./Pages/DashboardPage";
 
 function App() {
   return (
@@ -25,7 +25,7 @@ function App() {
             <Route path="/login-callback" element={<LoginCallback />} />
 
             {/* Dashboard route */}
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard" element={<DashboardPage/>} />
           </Routes>
         </div>
         <Footer />
