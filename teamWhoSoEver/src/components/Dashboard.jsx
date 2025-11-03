@@ -230,8 +230,8 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-100 px-6 py-10">
-     <div className="w-full max-w-4xl sm:max-w-6xl mx-auto px-4 sm:px-6">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-100  py-10  px-2 sm:px-6 mx-auto ">
+<div className="w-full px-2 sm:px-6 mx-auto">
 
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-10">
