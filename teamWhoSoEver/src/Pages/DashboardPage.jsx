@@ -16,10 +16,12 @@ const DashboardPage = () => {
   return (
     <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white p-6">
       {adminEmails.includes(userEmail) ? (
-        <Shop />
+
+          <Dashboard />
+      
       ) : (
        
-         <Dashboard />
+           <Shop />
       )}
     </div>
   );

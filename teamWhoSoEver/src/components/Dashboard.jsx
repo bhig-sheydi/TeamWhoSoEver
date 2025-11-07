@@ -230,9 +230,8 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-100  py-10  px-2 sm:px-6 mx-auto ">
-<div className="w-full px-2 sm:px-6 mx-auto">
-
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-100 px-6 py-10">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-10">
           <div>
@@ -424,37 +423,45 @@ const Dashboard = () => {
         {merch.length === 0 ? (
           <p className="text-center text-gray-600 mt-10">No products found.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {currentItems.map((item) => (
-              <Card
-                key={item.product_id}
-                className="rounded-2xl shadow-lg hover:shadow-2xl transition bg-white dark:bg-gray-800 overflow-hidden"
-              >
-                <CardHeader className="p-0">
-                  <img
-                    src={item.product_image_url}
-                    alt={item.product_name}
-                    className="w-full h-48 object-cover rounded-t-2xl"
-                  />
-                </CardHeader>
-                <CardContent className="p-4">
-                  <CardTitle className="text-lg font-semibold">
-                    {item.product_name}
-                  </CardTitle>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    ${item.selling_price.toFixed(2)}
-                  </p>
-                  <Button
-                    className="bg-red-500 hover:bg-red-600 text-white"
-                    onClick={() => handleDeleteProduct(item.product_id, item.product_image_url)}
-                  >
-                    <Trash2 className="w-4 h-4 mr-1" /> Delete
-                  </Button>
-
-                </CardContent>
-              </Card>
-            ))}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    {currentItems.map((item) => (
+      <Card
+        key={item.product_id}
+        className="rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 bg-white dark:bg-gray-800 overflow-hidden hover:scale-[1.02]"
+      >
+        <CardHeader className="p-0 relative">
+          <div className="overflow-hidden rounded-t-2xl">
+            <img
+              src={item.product_image_url}
+              alt={item.product_name}
+              className="w-full  object-cover hover:scale-105 transition-transform duration-500"
+            />
           </div>
+        </CardHeader>
+        <CardContent className="p-5 space-y-2">
+          <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            {item.product_name}
+          </CardTitle>
+          <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
+            {item.product_description || "No description provided."}
+          </p>
+          <p className="text-green-600 dark:text-green-400 font-bold">
+            ${item.selling_price.toFixed(2)}
+          </p>
+          <div className="flex justify-between items-center mt-4">
+            <Button
+              className="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 rounded-lg flex items-center"
+              onClick={() =>
+                handleDeleteProduct(item.product_id, item.product_image_url)
+              }
+            >
+              <Trash2 className="w-4 h-4 mr-1" /> Delete
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
         )}
 
         {/* Pagination */}
