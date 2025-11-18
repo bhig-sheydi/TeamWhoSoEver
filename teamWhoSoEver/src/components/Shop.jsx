@@ -26,29 +26,25 @@ const Shop = () => {
   const [newReviewText, setNewReviewText] = useState("");
   const [newReviewRating, setNewReviewRating] = useState(0);
 
-  // Fetch merch data with aggregated ratings
   useEffect(() => {
     const fetchMerch = async () => {
       setLoading(true);
-
-      // Fetch all products and their reviews (including reviewer info)
       const { data, error } = await supabase
         .from("products")
         .select(`
-        *,
-        product_reviews (
-          rating,
-          review_text,
-          user_id,
-          user_name,
-          user_avatar_url
-        )
-      `)
+          *,
+          product_reviews (
+            rating,
+            review_text,
+            user_id,
+            user_name,
+            user_avatar_url
+          )
+        `)
         .order("selling_price", { ascending: true });
 
-      if (error) {
-        console.error("Error fetching merch:", error);
-      } else if (data) {
+      if (error) console.error("Error fetching merch:", error);
+      else if (data) {
         const formattedData = data.map((item) => {
           const ratingsArray = item.product_reviews || [];
           const avgRating =
@@ -63,11 +59,12 @@ const Shop = () => {
             image: item.product_image_url,
             isNew: false,
             average_rating: avgRating,
+            selectedSize: "",
+            quantity: 1, // Default quantity
           };
         });
 
         setMerchData(formattedData);
-
         setRatings(
           formattedData.reduce(
             (acc, item) => ({ ...acc, [item.id]: item.average_rating }),
@@ -82,59 +79,73 @@ const Shop = () => {
     fetchMerch();
   }, []);
 
-
   const totalPages = Math.ceil(merchData.length / itemsPerPage);
   const currentItems = merchData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const handleAddToCart = (id) => alert(`Added item ${id} to cart!`);
+  const handleAddToCart = (product) => {
+    if (!product.selectedSize) {
+      alert("Please select a size before adding to cart!");
+      return;
+    }
+
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const existingItemIndex = cart.findIndex(
+      (item) =>
+        item.id === product.id && item.selectedSize === product.selectedSize
+    );
+
+    if (existingItemIndex !== -1) {
+      cart[existingItemIndex].quantity += product.quantity;
+    } else {
+      cart.push({ ...product });
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+    alert(`${product.name} (${product.selectedSize}) x${product.quantity} added to cart!`);
+  };
 
   const toggleFavorite = (id) =>
     setFavorites((prev) => ({ ...prev, [id]: !prev[id] }));
 
-  // Open modal and fetch reviews
-// Open modal and fetch reviews
-const handleViewReviews = async (product) => {
-  setModalProduct(product);
-  setModalOpen(true);
+  const handleViewReviews = async (product) => {
+    setModalProduct(product);
+    setModalOpen(true);
 
-  const { data } = await supabase
-    .from("product_reviews")
-    .select("rating, review_text, user_id, user_name, user_avatar_url")
-    .eq("product_id", product.id);
+    const { data } = await supabase
+      .from("product_reviews")
+      .select("rating, review_text, user_id, user_name, user_avatar_url")
+      .eq("product_id", product.id);
 
-  setModalReviews(data || []);
+    setModalReviews(data || []);
 
-  const userReview = data?.find((r) => r.user_id === session?.user?.id);
-  if (userReview) {
-    setNewReviewText(userReview.review_text || "");
-    setNewReviewRating(userReview.rating || 0);
-  } else {
-    setNewReviewText("");
-    setNewReviewRating(0);
-  }
-};
+    const userReview = data?.find((r) => r.user_id === session?.user?.id);
+    if (userReview) {
+      setNewReviewText(userReview.review_text || "");
+      setNewReviewRating(userReview.rating || 0);
+    } else {
+      setNewReviewText("");
+      setNewReviewRating(0);
+    }
+  };
 
-
-
-  // Submit or update review
   const handleSubmitReview = async () => {
     if (!session?.user?.id || !modalProduct) return;
 
-    // Upsert review
     await supabase.from("product_reviews").upsert(
       {
         product_id: modalProduct.id,
         user_id: session.user.id,
         rating: newReviewRating,
         review_text: newReviewText,
+        user_name: session.user.user_metadata?.full_name || session.user.email.split("@")[0],
+        user_avatar_url: session.user.user_metadata?.avatar_url || null,
       },
       { onConflict: ["product_id", "user_id"] }
     );
 
-    // Recalculate average rating
     const { data: reviews } = await supabase
       .from("product_reviews")
       .select("rating")
@@ -145,19 +156,16 @@ const handleViewReviews = async (product) => {
         ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
         : 0;
 
-    // Update average_rating in products table
     await supabase
       .from("products")
       .update({ average_rating: avgRating })
       .eq("product_id", modalProduct.id);
 
-    // Update UI
     setRatings((prev) => ({ ...prev, [modalProduct.id]: avgRating }));
 
-    // Refresh modal reviews
     const { data: updatedReviews } = await supabase
       .from("product_reviews")
-      .select("rating, review_text, user_id")
+      .select("rating, review_text, user_id, user_name, user_avatar_url")
       .eq("product_id", modalProduct.id);
 
     setModalReviews(updatedReviews || []);
@@ -199,11 +207,11 @@ const handleViewReviews = async (product) => {
                 </span>
               )}
 
-              <CardHeader className="p-0">
+              <CardHeader className="p-0 pt-10 h-52 flex items-center justify-center">
                 <img
                   src={item.image || "https://example.com/placeholder.png"}
                   alt={item.name}
-                  className="w-full object-cover rounded-t-3xl hover:scale-105 transition-transform duration-500"
+                  className="w-52 object-cover h-52 rounded-t-3xl hover:scale-105 transition-transform duration-500"
                 />
               </CardHeader>
 
@@ -212,15 +220,60 @@ const handleViewReviews = async (product) => {
                   {item.name}
                   <Heart
                     onClick={() => toggleFavorite(item.id)}
-                    className={`w-6 h-6 cursor-pointer transition-colors ${favorites[item.id]
-                      ? "text-red-500 fill-red-500"
-                      : "text-gray-300 dark:text-gray-600"
-                      } hover:text-red-500 hover:fill-red-500`}
+                    className={`w-6 h-6 cursor-pointer transition-colors ${
+                      favorites[item.id]
+                        ? "text-red-500 fill-red-500"
+                        : "text-gray-300 dark:text-gray-600"
+                    } hover:text-red-500 hover:fill-red-500`}
                   />
                 </CardTitle>
 
                 <p className="text-sm text-gray-600 dark:text-gray-400">${item.price}</p>
 
+                {/* Size selector */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Select Size:</label>
+                  <select
+                    value={item.selectedSize}
+                    onChange={(e) =>
+                      setMerchData((prev) =>
+                        prev.map((p) =>
+                          p.id === item.id ? { ...p, selectedSize: e.target.value } : p
+                        )
+                      )
+                    }
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-2 bg-white dark:bg-gray-800"
+                  >
+                    <option value="">Choose a size</option>
+                    <option value="XS">XS</option>
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                  </select>
+                </div>
+
+                {/* Quantity selector */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Quantity:</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={item.quantity}
+                    onChange={(e) =>
+                      setMerchData((prev) =>
+                        prev.map((p) =>
+                          p.id === item.id
+                            ? { ...p, quantity: parseInt(e.target.value) || 1 }
+                            : p
+                        )
+                      )
+                    }
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-2 bg-white dark:bg-gray-800"
+                  />
+                </div>
+
+                {/* Ratings */}
                 <div className="flex items-center space-x-1">
                   {Array.from({ length: 5 }, (_, i) => (
                     <Star
@@ -236,10 +289,11 @@ const handleViewReviews = async (product) => {
                           { onConflict: ["product_id", "user_id"] }
                         );
                       }}
-                      className={`w-6 h-6 cursor-pointer transition-colors ${i < ratings[item.id]
-                        ? "text-yellow-400 fill-yellow-400"
-                        : "text-gray-300 dark:text-gray-600"
-                        } hover:text-yellow-500 hover:fill-yellow-500`}
+                      className={`w-6 h-6 cursor-pointer transition-colors ${
+                        i < ratings[item.id]
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-gray-300 dark:text-gray-600"
+                      } hover:text-yellow-500 hover:fill-yellow-500`}
                     />
                   ))}
                   <span className="text-sm text-gray-500 ml-2">
@@ -255,8 +309,12 @@ const handleViewReviews = async (product) => {
                     <Plus className="inline mr-2 w-4 h-4" /> View Reviews
                   </Button>
                   <Button
-                    onClick={() => handleAddToCart(item.id)}
-                    className="flex-1 bg-green-500 text-white font-bold shadow-lg hover:shadow-xl transition-transform transform hover:scale-105"
+                    onClick={() => handleAddToCart(item)}
+                    className={`flex-1 font-bold shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 ${
+                      item.selectedSize
+                        ? "bg-green-500 text-white"
+                        : "bg-gray-400 text-gray-200 cursor-not-allowed"
+                    }`}
                   >
                     Add to Cart
                   </Button>
@@ -310,7 +368,10 @@ const handleViewReviews = async (product) => {
                 >
                   <div className="flex items-center space-x-3 mb-1">
                     <img
-                      src={rev.user_avatar_url || "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+                      src={
+                        rev.user_avatar_url ||
+                        "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                      }
                       alt={rev.user_name || "User"}
                       className="w-8 h-8 rounded-full object-cover border border-gray-300 dark:border-gray-600"
                     />
@@ -322,10 +383,11 @@ const handleViewReviews = async (product) => {
                         {Array.from({ length: 5 }, (_, i) => (
                           <Star
                             key={i}
-                            className={`w-4 h-4 ${i < rev.rating
-                              ? "text-yellow-400 fill-yellow-400"
-                              : "text-gray-300 dark:text-gray-600"
-                              }`}
+                            className={`w-4 h-4 ${
+                              i < rev.rating
+                                ? "text-yellow-400 fill-yellow-400"
+                                : "text-gray-300 dark:text-gray-600"
+                            }`}
                           />
                         ))}
                       </div>
@@ -336,7 +398,6 @@ const handleViewReviews = async (product) => {
                   </p>
                 </div>
               ))}
-
             </div>
 
             <div className="space-y-2">
@@ -346,8 +407,11 @@ const handleViewReviews = async (product) => {
                   <Star
                     key={i}
                     onClick={() => setNewReviewRating(i + 1)}
-                    className={`w-6 h-6 cursor-pointer transition-colors ${i < newReviewRating ? "text-yellow-400 fill-yellow-400" : "text-gray-300 dark:text-gray-600"
-                      } hover:text-yellow-500 hover:fill-yellow-500`}
+                    className={`w-6 h-6 cursor-pointer transition-colors ${
+                      i < newReviewRating
+                        ? "text-yellow-400 fill-yellow-400"
+                        : "text-gray-300 dark:text-gray-600"
+                    } hover:text-yellow-500 hover:fill-yellow-500`}
                   />
                 ))}
               </div>

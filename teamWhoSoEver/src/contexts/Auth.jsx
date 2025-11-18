@@ -26,8 +26,18 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
+  // ✅ Add logout function
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setSession(null);
+    } catch (error) {
+      console.error("Logout failed:", error.message);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ session, setSession, loading }}>
+    <AuthContext.Provider value={{ session, setSession, loading, logout }}>
       {children}
     </AuthContext.Provider>
   );

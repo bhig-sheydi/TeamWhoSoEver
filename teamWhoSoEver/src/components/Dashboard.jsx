@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import {  Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 import "swiper/css";
 import {
@@ -37,26 +37,86 @@ const Dashboard = () => {
     product_image_url: "",
   });
 
-        const handleDeleteProduct = async (id, imageUrl) => {
-          if (!confirm("Are you sure you want to delete this product?")) return;
+  const handleDeleteProduct = async (id, imageUrl) => {
+    if (!confirm("Are you sure you want to delete this product?")) return;
 
-          try {
-            // Delete image from storage
-            if (imageUrl) {
-              const filePath = imageUrl.split("/").pop();
-              await supabase.storage.from("product_image").remove([filePath]);
-            }
+    try {
+      // Delete image from storage
+      if (imageUrl) {
+        const filePath = imageUrl.split("/").pop();
+        await supabase.storage.from("product_image").remove([filePath]);
+      }
 
-            // Delete product
-            const { error } = await supabase.from("products").delete().eq("product_id", id);
-            if (error) throw error;
+      // Delete product
+      const { error } = await supabase.from("products").delete().eq("product_id", id);
+      if (error) throw error;
 
-            alert("🗑️ Product deleted successfully!");
-            setMerch(merch.filter((m) => m.product_id !== id));
-          } catch (error) {
-            alert("❌ Failed to delete product: " + error.message);
-          }
-        };
+      alert("🗑️ Product deleted successfully!");
+      setMerch(merch.filter((m) => m.product_id !== id));
+    } catch (error) {
+      alert("❌ Failed to delete product: " + error.message);
+    }
+  };
+
+  const filterByCalendarYear = (salesData) => {
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0); // Jan 1st, 00:00
+    const endOfYear = new Date(now); // now, or you can set end to Dec 31st if needed
+
+    return salesData.filter((s) => {
+      const saleDate = new Date(s.sale_date);
+      return saleDate >= startOfYear && saleDate <= endOfYear;
+    });
+  };
+
+
+  const filterByCalendarDay = (salesData) => {
+    const now = new Date();
+    const startOfDay = new Date(now);
+    startOfDay.setHours(0, 0, 0, 0); // midnight today
+
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 59, 999); // end of today
+
+    return salesData.filter((s) => {
+      const saleDate = new Date(s.sale_date);
+      return saleDate >= startOfDay && saleDate <= endOfDay;
+    });
+  };
+
+  const filterByCalendarMonth = (salesData) => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0); // first day of month
+    const endOfMonth = new Date(now); // now, or you can set end to last day if needed
+
+    return salesData.filter((s) => {
+      const saleDate = new Date(s.sale_date);
+      return saleDate >= startOfMonth && saleDate <= endOfMonth;
+    });
+  };
+
+
+
+  const filterByCalendarWeek = (salesData) => {
+    const now = new Date();
+    // Get the day of the week (0 = Sunday, 1 = Monday, … 6 = Saturday)
+    const dayOfWeek = now.getDay();
+
+    // Calculate start of the week (Monday)
+    const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const startOfWeek = new Date(now);
+    startOfWeek.setHours(0, 0, 0, 0); // reset time
+    startOfWeek.setDate(now.getDate() - diffToMonday);
+
+    // End of week is now
+    const endOfWeek = now;
+
+    return salesData.filter((s) => {
+      const saleDate = new Date(s.sale_date);
+      return saleDate >= startOfWeek && saleDate <= endOfWeek;
+    });
+  };
+
   // Fetch profile
   useEffect(() => {
     const fetchProfile = async () => {
@@ -130,10 +190,14 @@ const Dashboard = () => {
           return { sales: salesCount, revenue, profit, loss };
         };
 
-        const daily = calculateStats(filterByDays(1));
-        const weekly = calculateStats(filterByDays(7));
-        const monthly = calculateStats(filterByDays(30));
-        const yearly = calculateStats(filterByDays(365));
+        const dailySales = filterByCalendarDay(sales);
+        const daily = calculateStats(dailySales);
+        const weeklySales = filterByCalendarWeek(sales);
+        const weekly = calculateStats(weeklySales);
+        const monthlySales = filterByCalendarMonth(sales);
+        const monthly = calculateStats(monthlySales);
+        const yearlySales = filterByCalendarYear(sales);
+        const yearly = calculateStats(yearlySales);
         const allTime = calculateStats(sales);
 
         setAnalytics({ daily, weekly, monthly, yearly, allTime });
@@ -423,45 +487,45 @@ const Dashboard = () => {
         {merch.length === 0 ? (
           <p className="text-center text-gray-600 mt-10">No products found.</p>
         ) : (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-    {currentItems.map((item) => (
-      <Card
-        key={item.product_id}
-        className="rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 bg-white dark:bg-gray-800 overflow-hidden hover:scale-[1.02]"
-      >
-        <CardHeader className="p-0 relative">
-          <div className="overflow-hidden rounded-t-2xl">
-            <img
-              src={item.product_image_url}
-              alt={item.product_name}
-              className="w-full  object-cover hover:scale-105 transition-transform duration-500"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {currentItems.map((item) => (
+              <Card
+                key={item.product_id}
+                className="rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 bg-white dark:bg-gray-800 overflow-hidden hover:scale-[1.02]"
+              >
+                <CardHeader className="p-0 relative">
+                  <div className="overflow-hidden rounded-t-2xl">
+                    <img
+                      src={item.product_image_url}
+                      alt={item.product_name}
+                      className="w-full  object-cover hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                </CardHeader>
+                <CardContent className="p-5 space-y-2">
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    {item.product_name}
+                  </CardTitle>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
+                    {item.product_description || "No description provided."}
+                  </p>
+                  <p className="text-green-600 dark:text-green-400 font-bold">
+                    ${item.selling_price.toFixed(2)}
+                  </p>
+                  <div className="flex justify-between items-center mt-4">
+                    <Button
+                      className="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 rounded-lg flex items-center"
+                      onClick={() =>
+                        handleDeleteProduct(item.product_id, item.product_image_url)
+                      }
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" /> Delete
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        </CardHeader>
-        <CardContent className="p-5 space-y-2">
-          <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {item.product_name}
-          </CardTitle>
-          <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
-            {item.product_description || "No description provided."}
-          </p>
-          <p className="text-green-600 dark:text-green-400 font-bold">
-            ${item.selling_price.toFixed(2)}
-          </p>
-          <div className="flex justify-between items-center mt-4">
-            <Button
-              className="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 rounded-lg flex items-center"
-              onClick={() =>
-                handleDeleteProduct(item.product_id, item.product_image_url)
-              }
-            >
-              <Trash2 className="w-4 h-4 mr-1" /> Delete
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    ))}
-  </div>
         )}
 
         {/* Pagination */}
