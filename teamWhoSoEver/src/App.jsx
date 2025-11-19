@@ -10,6 +10,7 @@ import SignupPage from "./Pages/SignupPage";
 import LoginCallback from "./components/LoginCallBack";
 import DashboardPage from "./Pages/DashboardPage";
 import CheckoutPageM from "./Pages/CheckoutPageM";
+import SuccessPage from "./components/SucessPage";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/cart" element={<CheckoutPageM/>} />
+            <Route path="/success" element={<SuccessPage/>} />
 
             {/* OAuth redirect callback */}
             <Route path="/login-callback" element={<LoginCallback />} />
