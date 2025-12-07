@@ -62,6 +62,14 @@ const Navbar = () => {
             Home
           </Link>
 
+                    <Link
+            to="/orders"
+            className="hover:text-yellow-300 transition"
+            onClick={() => setMenuOpen(false)}
+          >
+            Orders
+          </Link>
+
           <Link
             to={isAdmin ? "/dashboard" : "/dashboard"}
             className="hover:text-yellow-300 transition"

@@ -11,6 +11,16 @@ import LoginCallback from "./components/LoginCallBack";
 import DashboardPage from "./Pages/DashboardPage";
 import CheckoutPageM from "./Pages/CheckoutPageM";
 import SuccessPage from "./components/SucessPage";
+import OrderPage from "./Pages/OrderPage";
+import TeamWhosoeverSVG from "./components/svg";
+import ClothingCustomizerLayout from "./components/ClothingLayout";
+import Hoodie from "./components/Hoodie";
+import Tshirt from "./components/Tshirt";
+import OrderDesignPreview from "./components/OrderPrview";
+import CrossLogo from "./components/CrossLogo1";
+import CrossLogo2 from "./components/CrossLogo2";
+import CrossLogo3 from "./components/CrossLogo3";
+import CrossLogo4 from "./components/CrossLogo4";
 
 function App() {
   return (
@@ -24,6 +34,12 @@ function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/cart" element={<CheckoutPageM/>} />
             <Route path="/success" element={<SuccessPage/>} />
+            <Route path="/orders" element={<OrderPage/>} />
+            <Route path="/custom" element={<ClothingCustomizerLayout/>} />
+            <Route path="/custom" element={<ClothingCustomizerLayout/>} />
+            <Route path="/custom2" element={<OrderDesignPreview/>} />
+            <Route path="/cross" element={<CrossLogo4/>} />
+            
 
             {/* OAuth redirect callback */}
             <Route path="/login-callback" element={<LoginCallback />} />

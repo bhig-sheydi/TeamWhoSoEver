@@ -1,9 +1,9 @@
 import React from "react";
-import Dashboard from "@/components/Dashboard";
-import Shop from "@/components/Shop";
-import { useAuth } from "@/contexts/Auth"; // Assuming you're using your Auth context
+import { useAuth } from "@/contexts/Auth";
+import AdminOrders from "@/components/AdminOrders";
+import Orders from "@/components/Orders";
 
-const DashboardPage = () => {
+const OrderPage = () => {
   const { session, loading } = useAuth();
 
   const adminEmails = ["headjada@gmail.com", "anotheradmin@example.com"];
@@ -14,18 +14,14 @@ const DashboardPage = () => {
   const userEmail = session.user.email;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white p-6">
+    <div className="min-h-screen bg-white dark:bg-black p-6">
       {adminEmails.includes(userEmail) ? (
-        <Dashboard />
-
+        <AdminOrders />
       ) : (
-
-        <Shop />
-
-
+        <Orders />
       )}
     </div>
   );
 };
 
-export default DashboardPage;
+export default OrderPage;

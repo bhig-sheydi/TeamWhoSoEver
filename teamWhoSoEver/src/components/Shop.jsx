@@ -26,26 +26,31 @@ const Shop = () => {
   const [newReviewText, setNewReviewText] = useState("");
   const [newReviewRating, setNewReviewRating] = useState(0);
 
-  useEffect(() => {
-    const fetchMerch = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("products")
-        .select(`
-          *,
-          product_reviews (
-            rating,
-            review_text,
-            user_id,
-            user_name,
-            user_avatar_url
-          )
-        `)
-        .order("selling_price", { ascending: true });
+ useEffect(() => {
+  const fetchMerch = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("products")
+      .select(`
+        *,
+        product_reviews (
+          rating,
+          review_text,
+          user_id,
+          user_name,
+          user_avatar_url
+        )
+      `)
+      .order("selling_price", { ascending: true });
 
-      if (error) console.error("Error fetching merch:", error);
-      else if (data) {
-        const formattedData = data.map((item) => {
+    if (error) console.error("Error fetching merch:", error);
+    else if (data) {
+      // List of product names to exclude
+      const excludedProducts = ["Custom Hoodie", "Custom Tee"];
+
+      const formattedData = data
+        .filter(item => !excludedProducts.includes(item.product_name)) // filter out excluded products
+        .map((item) => {
           const ratingsArray = item.product_reviews || [];
           const avgRating =
             ratingsArray.length > 0
@@ -64,20 +69,21 @@ const Shop = () => {
           };
         });
 
-        setMerchData(formattedData);
-        setRatings(
-          formattedData.reduce(
-            (acc, item) => ({ ...acc, [item.id]: item.average_rating }),
-            {}
-          )
-        );
-      }
+      setMerchData(formattedData);
+      setRatings(
+        formattedData.reduce(
+          (acc, item) => ({ ...acc, [item.id]: item.average_rating }),
+          {}
+        )
+      );
+    }
 
-      setLoading(false);
-    };
+    setLoading(false);
+  };
 
-    fetchMerch();
-  }, []);
+  fetchMerch();
+}, []);
+
 
   const totalPages = Math.ceil(merchData.length / itemsPerPage);
   const currentItems = merchData.slice(
