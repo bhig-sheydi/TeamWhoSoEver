@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react"; 
 import { motion } from "framer-motion";
 import Hoodie from "../components/Hoodie";
 import Tshirt from "../components/Tshirt";
@@ -58,12 +58,6 @@ const ClothingPreview = ({ garment, color, selected, onSelect, selectedDesign })
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 640);
 
-
-
-
-
-
-
   if (!garment) return null;
 
   const SVGComponent = garment.name === "hoodie" ? Hoodie : Tshirt;
@@ -104,12 +98,13 @@ const ClothingPreview = ({ garment, color, selected, onSelect, selectedDesign })
       return { x: clamp(x), y: clamp(y) };
     });
   };
+
   // Save to localStorage whenever garment changes
-useEffect(() => {
-  if (garment) {
-    localStorage.setItem("selectedGarment", JSON.stringify(garment));
-  }
-}, [garment]);
+  useEffect(() => {
+    if (garment) {
+      localStorage.setItem("selectedGarment", JSON.stringify(garment));
+    }
+  }, [garment]);
 
   const getPixelPosition = () => ({
     left: (posPct.x / 100) * containerRect.width,
@@ -119,17 +114,20 @@ useEffect(() => {
 
   const pixelPos = getPixelPosition();
 
-  const saveImage = () => {
-    if (!containerRef.current) return;
-    domtoimage
-      .toPng(containerRef.current)
-      .then((dataUrl) => {
-        const link = document.createElement("a");
-        link.download = `${garment.name}-${selectedDesign || "design"}.png`;
-        link.href = dataUrl;
-        link.click();
-      })
-      .catch((err) => console.error("Failed to save image:", err));
+  // ✅ Capture preview as Base64 safely using dom-to-image
+  const saveImage = async () => {
+    if (!containerRef.current) return alert("Preview not available");
+
+    try {
+      const dataUrl = await domtoimage.toPng(containerRef.current);
+      const link = document.createElement("a");
+      link.download = `${garment.name}-${selectedDesign || "design"}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error("Failed to save image:", err);
+      alert("Failed to capture design preview. Please try again.");
+    }
   };
 
   return (
@@ -138,7 +136,7 @@ useEffect(() => {
       className={`relative flex justify-center items-center w-full h-full ${
         selected ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-100" : ""
       }`}
-      style={{ backgroundColor: dynamicBackground(color) }}
+      style={{ backgroundColor: "#ffffff" }} // Force solid background for capture
     >
       {/* Clothing */}
       <SVGComponent
@@ -172,7 +170,6 @@ useEffect(() => {
             setPosPct({ x: newX, y: newY });
           }}
         >
-          {/* Wrapper for blue selection ring with padding for growth */}
           <div
             className={`relative w-full h-full ${
               isDesignSelected ? "ring-2 ring-blue-500 rounded-md" : ""

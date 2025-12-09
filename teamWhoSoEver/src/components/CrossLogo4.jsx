@@ -37,7 +37,10 @@ const CrossLogo4 = ({
         <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="100%" height="100%" version="1.1" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd"
           viewBox="0 0 5826.77 8267.72"
           xmlns:xlink="http://www.w3.org/1999/xlink"
-          xmlns:xodm="http://www.corel.com/coreldraw/odm/2003">
+          xmlns:xodm="http://www.corel.com/coreldraw/odm/2003"
+          transform="translate(3, 17)"
+          >
+
           <defs>
 
             <font id="FontID0" horiz-adv-x="722" font-variant="normal" fill-rule="nonzero" stroke-width="55.67" stroke-miterlimit="2.61313" font-style="normal" font-weight="700">

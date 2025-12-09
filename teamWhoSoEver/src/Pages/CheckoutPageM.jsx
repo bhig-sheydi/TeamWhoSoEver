@@ -3,7 +3,7 @@ import React from 'react'
 
 const CheckoutPageM = () => {
   return (
-    <div>
+    <div className='h-screen flex items-center justify-center'>
         <CheckoutPage/>
     </div>
   )

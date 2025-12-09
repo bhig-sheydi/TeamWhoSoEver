@@ -52,12 +52,13 @@ const CrossLogo1 = ({
 }) => {
     return (
         <div className=" flex items-center justify-center ">
-            <div className="">
+            <div className="" >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="150%"
                     height="150%"
                     viewBox="0 0 5826.77 8267.72"
+                    transform="translate(-15, 14)"
                 >
                     <defs>
                         <linearGradient id="id1" gradientUnits="userSpaceOnUse" x1="2054.4" y1="2507.22" x2="2244.19" y2="2507.22">

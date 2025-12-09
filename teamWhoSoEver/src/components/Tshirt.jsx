@@ -2,13 +2,15 @@ import React from "react";
 
 const Tshirt = ({ className, color, onClick }) => (
   <svg
-    className={className}
+    className="w-[70%]"
     xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 5826.77 8267.72"
+    viewBox="0 0 5826.77 8265.72"
     fill={color || "currentColor"} // dynamic color
     onClick={onClick} // handle selection
+
+      
   >
-    <g transform="translate(0, 150)"> {/* adjust Y offset to center visually */}
+    <g transform="translate(370, 700)"> {/* adjust Y offset to center visually */}
       <path
         id="TshirtBody"
         d="M2739.44 1752.86c-24.16,8.63 -54.53,18.29 -92.15,27.27 -37.62,8.97 -82.49,17.26 -123.91,21.06 

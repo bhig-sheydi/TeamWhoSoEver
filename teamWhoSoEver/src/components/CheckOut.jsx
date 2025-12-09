@@ -114,55 +114,61 @@ const CheckoutPage = () => {
   // Final checkout after confirming address
   const handleCheckout = async () => {
     setConfirmAddressPopup(false);
-
+  
     try {
       const order_number = `ORD-${new Date()
         .toISOString()
         .slice(0, 10)
         .replace(/-/g, "")}-${Math.floor(Math.random() * 10000)}`;
-
+  
       const subtotal = total;
       const total_amount = total;
-      const firstItem = cart[0];
-
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert([
-          {
-            user_id: session.user.id,
-            order_number,
-            status: "pending",
-            subtotal,
-            total_amount,
-            payment_provider: "stripe",
-            notes: "Awaiting payment confirmation",
-
-            // Product summary
-            product_id: firstItem.id,
-            product_name: firstItem.name,
-            size: firstItem.selectedSize,
-            unit_price: firstItem.price,
-            quantity: firstItem.quantity,
-
-            // NEW SHIPPING INFO
-            shipping_name: shipping.name,
-            shipping_address_line1: shipping.line1,
-            shipping_address_line2: shipping.line2,
-            shipping_city: shipping.city,
-            shipping_state: shipping.state,
-            shipping_postal_code: shipping.postal,
-            shipping_country: shipping.country,
-          },
-        ])
-        .select()
-        .single();
-
-      if (orderError) {
-        console.error(orderError);
-        alert("Failed to create order");
-        return;
+  
+      for (let item of cart) {
+        // Determine if item has custom base64
+        const customProductUrl = item.base64 || null;
+  
+        const { data: order, error: orderError } = await supabase
+          .from("orders")
+          .insert([
+            {
+              user_id: session.user.id,
+              order_number,
+              status: "pending",
+              subtotal,
+              total_amount,
+              payment_provider: "stripe",
+              notes: "Awaiting payment confirmation",
+  
+              // Product info
+              product_id: item.id,
+              product_name: item.name,
+              size: item.selectedSize,
+              unit_price: item.price,
+              quantity: item.quantity,
+              customProductUrl, // store base64 string if exists, else null
+  
+              // Shipping info
+              shipping_name: shipping.name,
+              shipping_address_line1: shipping.line1,
+              shipping_address_line2: shipping.line2,
+              shipping_city: shipping.city,
+              shipping_state: shipping.state,
+              shipping_postal_code: shipping.postal,
+              shipping_country: shipping.country,
+            },
+          ])
+          .select()
+          .single();
+  
+        if (orderError) {
+          console.error(orderError);
+          alert(`Failed to create order for ${item.name}`);
+          return;
+        }
       }
-
+  
+      // Optional: call Stripe after all items added
       const response = await fetch(
         "https://yedqieqvcdrrnunhlxyw.supabase.co/functions/v1/strip-init",
         {
@@ -180,25 +186,26 @@ const CheckoutPage = () => {
               quantity: item.quantity,
               size: item.selectedSize,
             })),
-            order_number: order.order_number,
+            order_number,
           }),
         }
       );
-
+  
       const data = await response.json();
-
+  
       if (!data.checkout_url) {
         alert("Stripe error");
         console.error(data);
         return;
       }
-
+  
       window.location.href = data.checkout_url;
     } catch (err) {
       console.error(err);
       alert("Unexpected error");
     }
   };
+  
 
   // UI STARTS HERE
   if (loading) return <div>Loading cart...</div>;

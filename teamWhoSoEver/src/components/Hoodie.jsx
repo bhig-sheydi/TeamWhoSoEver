@@ -2,12 +2,14 @@ import React from "react";
 
 const Hoodie = ({ className, color, onClick }) => (
   <svg
-    className={className}
+    className="w-[70%]"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 5826.77 8267.72"
     onClick={onClick}
+                        width="80%"
+                    height="180%"
   >
-    <g transform="translate(0, 150)">
+    <g transform="translate(370, 700)">
       {/* Entire hoodie body */}
       <path
         id="HoodieBody"
