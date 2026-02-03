@@ -3,11 +3,23 @@ import { Link, useNavigate } from "react-router-dom";
 import DarkModeToggle from "./DarkModeToggle";
 import logo from "../assets/logo2.png";
 import { useAuth } from "@/contexts/Auth";
-import { Menu, X, LogOut } from "lucide-react";
+import {
+  Menu,
+  X,
+  LogOut,
+  ShoppingCart,
+  Palette,
+  Home,
+  Package,
+  LayoutDashboard,
+  Store,
+  LogIn,
+  UserPlus
+} from "lucide-react";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { session, logout } = useAuth(); // ✅ make sure logout() exists in your AuthContext
+  const { session, logout } = useAuth();
   const navigate = useNavigate();
 
   const adminEmails = ["headjada@gmail.com", "anotheradmin@example.com"];
@@ -17,16 +29,19 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await logout(); // ✅ Log user out
+      await logout();
       setMenuOpen(false);
-      navigate("/"); // ✅ Redirect home after successful logout
+      navigate("/");
     } catch (error) {
       console.error("Logout failed:", error);
     }
   };
 
+  const linkClass =
+    "flex items-center gap-3 hover:text-yellow-300 transition";
+
   return (
-    <nav className="absolute top-0 left-0 w-full z-30 bg-transparent p-4 text-white">
+    <nav className="absolute top-0 left-0 w-full z-30 bg-transparent p-4 text-white pl-56">
       <div className="flex justify-between items-center">
         {/* Logo */}
         <div className="flex items-center gap-2">
@@ -36,8 +51,6 @@ const Navbar = () => {
         {/* Right controls */}
         <div className="flex items-center gap-4">
           <DarkModeToggle />
-
-          {/* Hamburger button */}
           <button
             onClick={toggleMenu}
             className="p-2 rounded-full bg-purple-500 hover:bg-purple-600 transition"
@@ -53,55 +66,70 @@ const Navbar = () => {
           menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex flex-col items-center justify-center h-full space-y-8 text-lg font-semibold">
-          <Link
-            to="/"
-            className="hover:text-yellow-300 transition"
-            onClick={() => setMenuOpen(false)}
-          >
+        <div className="flex flex-col items-start justify-center h-full space-y-7 text-lg font-semibold pl-10">
+
+          <Link to="/" onClick={() => setMenuOpen(false)} className={linkClass}>
+            <Home className="w-5 h-5" />
             Home
           </Link>
 
-                    <Link
-            to="/orders"
-            className="hover:text-yellow-300 transition"
-            onClick={() => setMenuOpen(false)}
-          >
-            Orders
-          </Link>
+          {!isAdmin && (
+            <Link to="/orders" onClick={() => setMenuOpen(false)} className={linkClass}>
+              <Package className="w-5 h-5" />
+              Orders
+            </Link>
+          )}
 
-          <Link
-            to={isAdmin ? "/dashboard" : "/dashboard"}
-            className="hover:text-yellow-300 transition"
-            onClick={() => setMenuOpen(false)}
-          >
-            {isAdmin ? "Dashboard" : "Shop"}
+          {/* 🛒 Cart — USERS ONLY */}
+          {!isAdmin && session && (
+            <Link to="/cart" onClick={() => setMenuOpen(false)} className={linkClass}>
+              <ShoppingCart className="w-5 h-5" />
+              Cart
+            </Link>
+          )}
+
+          {/* 🎨 Customize — USERS ONLY */}
+          {!isAdmin && session && (
+            <Link to="/custom" onClick={() => setMenuOpen(false)} className={linkClass}>
+              <Palette className="w-5 h-5" />
+              Customize
+            </Link>
+          )}
+
+          {/* Admin → Dashboard | User → Shop */}
+          <Link to="/dashboard" onClick={() => setMenuOpen(false)} className={linkClass}>
+            {isAdmin ? (
+              <>
+                <LayoutDashboard className="w-5 h-5" />
+                Dashboard
+              </>
+            ) : (
+              <>
+                <Store className="w-5 h-5" />
+                Shop
+              </>
+            )}
           </Link>
 
           {!session ? (
             <>
-              <Link
-                to="/login"
-                className="hover:text-yellow-300 transition"
-                onClick={() => setMenuOpen(false)}
-              >
+              <Link to="/login" onClick={() => setMenuOpen(false)} className={linkClass}>
+                <LogIn className="w-5 h-5" />
                 Login
               </Link>
 
-              <Link
-                to="/signup"
-                className="hover:text-yellow-300 transition"
-                onClick={() => setMenuOpen(false)}
-              >
+              <Link to="/signup" onClick={() => setMenuOpen(false)} className={linkClass}>
+                <UserPlus className="w-5 h-5" />
                 Signup
               </Link>
             </>
           ) : (
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 text-yellow-300 hover:text-red-400 transition"
+              className="flex items-center gap-3 text-yellow-300 hover:text-red-400 transition"
             >
-              <LogOut className="w-5 h-5" /> Logout
+              <LogOut className="w-5 h-5" />
+              Logout
             </button>
           )}
         </div>
