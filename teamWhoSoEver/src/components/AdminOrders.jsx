@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";    
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/contexts/Auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +17,9 @@ const AdminOrders = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
+
+  // ✅ Modal Image State
+  const [previewImage, setPreviewImage] = useState(null);
 
   const fetchOrders = async () => {
     if (!session?.user) return;
@@ -82,24 +85,16 @@ const AdminOrders = () => {
     if (!error) fetchOrders();
   };
 
-  // ✅ DELETE ORDER FUNCTION
   const deleteOrder = async (order_id) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this order? This cannot be undone."
     );
-
     if (!confirmDelete) return;
 
-    const { error } = await supabase
-      .from("orders")
-      .delete()
-      .eq("order_id", order_id);
+    const { error } = await supabase.from("orders").delete().eq("order_id", order_id);
 
-    if (error) {
-      console.error(error);
-    } else {
-      fetchOrders();
-    }
+    if (error) console.error(error);
+    else fetchOrders();
   };
 
   const statusColor = (status) => {
@@ -170,18 +165,11 @@ const AdminOrders = () => {
 
             <CardContent className="grid md:grid-cols-2 gap-4 text-sm">
               <div className="space-y-2">
+                <p><strong>Product:</strong> {order.product_name}</p>
+                <p><strong>Quantity:</strong> {order.quantity}</p>
+                <p><strong>Size:</strong> {order.size ?? "—"}</p>
                 <p>
-                  <strong>Product:</strong> {order.product_name}
-                </p>
-                <p>
-                  <strong>Quantity:</strong> {order.quantity}
-                </p>
-                <p>
-                  <strong>Size:</strong> {order.size ?? "—"}
-                </p>
-                <p>
-                  <strong>Total:</strong> ₦
-                  {Number(order.total_amount).toLocaleString()}
+                  <strong>Total:</strong> ₦{Number(order.total_amount).toLocaleString()}
                 </p>
               </div>
 
@@ -191,9 +179,7 @@ const AdminOrders = () => {
                   <>
                     <p>{order.shipping_name}</p>
                     <p>{order.shipping_address_line1}</p>
-                    {order.shipping_address_line2 && (
-                      <p>{order.shipping_address_line2}</p>
-                    )}
+                    {order.shipping_address_line2 && <p>{order.shipping_address_line2}</p>}
                     <p>
                       {order.shipping_city}, {order.shipping_state},{" "}
                       {order.shipping_country}
@@ -226,10 +212,7 @@ const AdminOrders = () => {
                   <Button
                     size="sm"
                     onClick={() =>
-                      updateTrackingNumber(
-                        order.order_id,
-                        trackingInputs[order.order_id]
-                      )
+                      updateTrackingNumber(order.order_id, trackingInputs[order.order_id])
                     }
                   >
                     Send/Update
@@ -250,26 +233,31 @@ const AdminOrders = () => {
                 )}
               </div>
 
-              {/* Action Buttons */}
+              {/* ACTION BUTTONS */}
               <div className="mt-4 flex flex-wrap gap-2">
-                {order.status !== "delivered" && (
+
+                {/* ✅ SHOW USER'S DESIGN */}
+                {order.customProductUrl && (
                   <Button
-                    onClick={() =>
-                      updateStatus(order.order_id, "delivered")
-                    }
+                    className="bg-purple-600 text-white"
+                    onClick={() => setPreviewImage(order.customProductUrl)}
                   >
+                    Show User's Design
+                  </Button>
+                )}
+
+                {order.status !== "delivered" && (
+                  <Button onClick={() => updateStatus(order.order_id, "delivered")}>
                     Mark as Delivered
                   </Button>
                 )}
 
                 {order.status === "delivered" && (
                   <p className="text-green-600 font-medium">
-                    ✔ Delivered on{" "}
-                    {new Date(order.fulfilled_at).toLocaleString()}
+                    ✔ Delivered on {new Date(order.fulfilled_at).toLocaleString()}
                   </p>
                 )}
 
-                {/* DELETE ORDER BUTTON */}
                 <Button
                   variant="destructive"
                   className="bg-red-600 hover:bg-red-700"
@@ -289,15 +277,32 @@ const AdminOrders = () => {
           <Button disabled={page === 1} onClick={() => setPage(page - 1)}>
             Prev
           </Button>
-          <span className="px-2 py-1">
-            {page} / {totalPages}
-          </span>
-          <Button
-            disabled={page === totalPages}
-            onClick={() => setPage(page + 1)}
-          >
+          <span className="px-2 py-1">{page} / {totalPages}</span>
+          <Button disabled={page === totalPages} onClick={() => setPage(page + 1)}>
             Next
           </Button>
+        </div>
+      )}
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl max-w-[90vw] max-h-[90vh]">
+            <h2 className="text-xl font-bold mb-4 text-center">User's Custom Design</h2>
+
+            <img
+              src={previewImage}
+              alt="Custom Design"
+              className="max-w-full max-h-[70vh] object-contain rounded border"
+            />
+
+            <Button
+              className="mt-4 w-full bg-red-600 text-white"
+              onClick={() => setPreviewImage(null)}
+            >
+              Close
+            </Button>
+          </div>
         </div>
       )}
     </div>

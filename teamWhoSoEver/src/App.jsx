@@ -36,8 +36,6 @@ function App() {
             <Route path="/success" element={<SuccessPage/>} />
             <Route path="/orders" element={<OrderPage/>} />
             <Route path="/custom" element={<ClothingCustomizerLayout/>} />
-            <Route path="/custom" element={<ClothingCustomizerLayout/>} />
-            <Route path="/custom2" element={<OrderDesignPreview/>} />
             <Route path="/cross" element={<CrossLogo4/>} />
             
 
