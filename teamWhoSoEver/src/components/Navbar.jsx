@@ -41,7 +41,7 @@ const Navbar = () => {
     "flex items-center gap-3 hover:text-yellow-300 transition";
 
   return (
-    <nav className="absolute top-0 left-0 w-full z-30 bg-transparent p-4 text-white pl-56">
+    <nav className="absolute top-0 left-0 w-full z-30 bg-transparent p-4 text-white">
       <div className="flex justify-between items-center">
         {/* Logo */}
         <div className="flex items-center gap-2">
@@ -66,7 +66,7 @@ const Navbar = () => {
           menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex flex-col items-start justify-center h-full space-y-7 text-lg font-semibold pl-10">
+        <div className="flex flex-col items-start justify-center h-full space-y-7 text-lg font-semibold pl-16 pr-6">
 
           <Link to="/" onClick={() => setMenuOpen(false)} className={linkClass}>
             <Home className="w-5 h-5" />
